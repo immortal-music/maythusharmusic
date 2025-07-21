@@ -12,25 +12,9 @@ async def start(client: Client, message: Message):
         video=f"https://files.catbox.moe/7ygwo6.mp4",
         caption=f"❤️ ʜᴇʏ {message.from_user.mention}\n\n🔮 ɪ ᴀᴍ {MUSIC_BOT_NAME}\n\n✨ ɪ ᴀᴍ ғᴀsᴛ ᴀɴᴅ ᴩᴏᴡᴇʀғᴜʟ ᴍᴜsɪᴄ ᴩʟᴀʏᴇʀ ʙᴏᴛ ᴡɪᴛʜ sᴏᴍᴇ ᴀᴡᴇsᴏᴍᴇ ғᴇᴀᴛᴜʀᴇs.\n\n💫 ɪғ ʏᴏᴜ ʜᴀᴠᴇ ᴀɴʏ ǫᴜᴇsᴛɪᴏɴs ᴛʜᴇɴ ᴊᴏɪɴ ᴏᴜʀ sᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ🤍...\n\n━━━━━━━━━━━━━━━━━━❄",
         reply_markup=InlineKeyboardMarkup(
-            [
-               [
-            InlineKeyboardButton(
-                text=" ❖ ᴏᴡɴᴇʀ ❖ ", url=f"https://t.me/iwillgoforwardalone"
-            ),
-            InlineKeyboardButton(
-                text="❖ ꜱᴜᴘᴘᴏʀᴛ ❖", url=f"https://t.me/sasukemusicbotsupportchat"
-            ),
-        ],
-                [
-            InlineKeyboardButton(
-                text="❖ ᴄʜᴀɴɴᴇʟ ❖", url=f"https://t.me/sasukevipmusicbotsupport"
-            ),
-                ],
                 [
                     InlineKeyboardButton(
                         "❖ ᴄʟᴏsᴇ ❖", callback_data="close"
-                    )
-                ],
-            ]
-        )
-    )
+                    ),
+        ],
+    ]
