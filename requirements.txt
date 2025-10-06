@@ -5,7 +5,7 @@ aiohttp==3.9.3
 asyncio==3.4.3
 ffmpeg-python
 gTTS
-dnspython==2.3.0
+dnspython==2.8.0
 hachoir
 heroku3
 motor
