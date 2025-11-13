@@ -4,6 +4,7 @@ import os
 import re
 import aiofiles
 import aiohttp
+import traceback  # <-- FIX 1: NameError အတွက် import ထည့်ပါ
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 from youtubesearchpython.__future__ import VideosSearch
 
@@ -24,7 +25,7 @@ def truncate(text):
     for i in list:
         if len(text1) + len(i) < 30:        
             text1 += " " + i
-        elif len(text2) + len(i) < 30:       
+        elif len(text2) + len(i) < 30:      
             text2 += " " + i
 
     text1 = text1.strip()
@@ -110,8 +111,21 @@ async def get_thumb(videoid: str):
             return f"cache/{videoid}_v4.png"
 
         url = f"https://www.youtube.com/watch?v={videoid}"
+        
+        # --- START FIX 2: UnboundLocalError အတွက် ---
+        # Variable တွေကို loop မစခင် ကြိုသတ်မှတ်ပါ
+        title = "Unsupported Title"
+        duration = "Live"
+        thumbnail = None # <--- အရေးကြီး
+        views = "Unknown Views"
+        channel = "Unknown Channel"
+        # --- END FIX 2 ---
+
         results = VideosSearch(url, limit=1)
-        for result in (await results.next())["result"]:
+        search_results = (await results.next()).get("result", []) # .get() သုံးပါ
+
+        if search_results: # list ထဲမှာ data ရှိမှ loop ပတ်ပါ
+            result = search_results[0]
             title = result.get("title")
             if title:
                 title = re.sub("\W+", " ", title).title()
@@ -123,8 +137,8 @@ async def get_thumb(videoid: str):
             thumbnail_data = result.get("thumbnails")
             if thumbnail_data:
                 thumbnail = thumbnail_data[0]["url"].split("?")[0]
-            else:
-                thumbnail = None
+            # thumbnail_data မရှိရင် thumbnail က None ဖြစ်ကျန်နေပါမည်
+            
             views_data = result.get("viewCount")
             if views_data:
                 views = views_data.get("short")
@@ -140,11 +154,16 @@ async def get_thumb(videoid: str):
             else:
                 channel = "Unknown Channel"
 
+        # --- START FIX 3: thumbnail ကို စစ်ဆေးပါ ---
+        if thumbnail is None:
+            logging.error(f"Could not find thumbnail URL for videoid {videoid}")
+            return None # thumbnail မရှိရင် None (သို့) default ပုံ ပြန်ပါ
+        # --- END FIX 3 ---
         
         async with aiohttp.ClientSession() as session:
             async with session.get(thumbnail) as resp:
-        
-                content = await resp.read()
+                
+                content = await resp.read() # content ကို တစ်ခါတည်း ဖတ်ပါ
                 if resp.status == 200:
                     content_type = resp.headers.get('Content-Type')
                     if 'jpeg' in content_type or 'jpg' in content_type:
@@ -156,11 +175,14 @@ async def get_thumb(videoid: str):
                         return None
 
                     filepath = f"cache/thumb{videoid}.png"
-                    f = await aiofiles.open(filepath, mode="wb")
-                    await f.write(await resp.read())
-                    await f.close()
-                    # os.system(f"file {filepath}")
                     
+                    # 'await resp.read()' ကို ထပ်မခေါ်ဘဲ 'content' ကို သုံးပါ
+                    async with aiofiles.open(filepath, mode="wb") as f:
+                        await f.write(content)
+                    # await f.close() # 'with' သုံးထားရင် မလိုပါ
+                else:
+                    logging.error(f"Failed to download thumbnail {videoid}, status: {resp.status}")
+                    return None # Download မရရင် None ပြန်ပါ
         
         image_path = f"cache/thumb{videoid}.png"
         youtube = Image.open(image_path)
@@ -214,7 +236,7 @@ async def get_thumb(videoid: str):
             circle_radius = 10 
             circle_position = (end_point_color[0], end_point_color[1])
             draw.ellipse([circle_position[0] - circle_radius, circle_position[1] - circle_radius,
-                      circle_position[0] + circle_radius, circle_position[1] + circle_radius], fill=line_color)
+                          circle_position[0] + circle_radius, circle_position[1] + circle_radius], fill=line_color)
     
         else:
             line_color = (255, 0, 0)
@@ -225,7 +247,7 @@ async def get_thumb(videoid: str):
             circle_radius = 10 
             circle_position = (end_point_color[0], end_point_color[1])
             draw.ellipse([circle_position[0] - circle_radius, circle_position[1] - circle_radius,
-                          circle_position[0] + circle_radius, circle_position[1] + circle_radius], fill=line_color)
+                                  circle_position[0] + circle_radius, circle_position[1] + circle_radius], fill=line_color)
 
         draw_text_with_shadow(background, draw, (text_x_position, 400), "00:00", arial, (255, 255, 255))
         draw_text_with_shadow(background, draw, (1080, 400), duration, arial, (255, 255, 255))
@@ -244,4 +266,4 @@ async def get_thumb(videoid: str):
     except Exception as e:
         logging.error(f"Error generating thumbnail for video {videoid}: {e}")
         traceback.print_exc()
-        return None
+        return None # <-- FIX 4: Exception ဖြစ်ရင် None ပြန်ပါ
