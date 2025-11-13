@@ -2,7 +2,7 @@ telethon==1.33.1
 aiofiles
 apscheduler
 aiohttp==3.9.3
-asyncio==3.4.3
+asyncio==4.0.0
 ffmpeg-python
 gTTS
 dnspython==2.3.0
