@@ -28,11 +28,17 @@ for filename in os.listdir(r"./strings/langs/"):
         for item in languages["en"]:
             if item not in languages[language_name]:
                 languages[language_name][item] = languages["en"][item]
-    try:
-        languages_present[language_name] = languages[language_name]["name"]
-    except:
-        print("There is some issue with the language file inside bot.")
-        exit()
+        
+        # (tab ခေါက်ပြီး အထဲကို ရွှေ့လိုက်ပါ)
+        try:
+            languages_present[language_name] = languages[language_name]["name"]
+        except KeyError:
+            # ဘယ် file မှာ ပြဿနာတက်လဲ ပိုရှင်းအောင် print ထုတ်ပါ
+            print(f"ERROR: Language file '{filename}' is missing the 'name' key.")
+            exit()
+        except Exception as e:
+            print(f"ERROR: Failed to process {filename}. Reason: {e}")
+            exit()
 
 
 
@@ -466,7 +472,6 @@ for filename in os.listdir(r"./strings/langs/"):
 
 
 LOGGERS = "Nhoe_Kyaite_Kaung_Layy_Robot"
-
 
 
 
