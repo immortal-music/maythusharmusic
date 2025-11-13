@@ -23,7 +23,7 @@ ntgcalls==2.0.6
 gitpython
 pykeyboard
 python-dotenv
-pyyaml==6.0.1
+pyyaml==6.0.3
 tgcrypto
 telegraph==2.2.0
 yt-dlp>=2025.10.22
