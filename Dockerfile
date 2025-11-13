@@ -1,4 +1,4 @@
-FROM nikolaik/python-nodejs:python3.10-nodejs21
+FROM nikolaik/python-nodejs:python3.11-nodejs24
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ffmpeg aria2 \
