@@ -1,5 +1,6 @@
 import asyncio
 import os
+import traceback  # <-- 1. NameError အတွက် ဒီတစ်ကြောင်း ထည့်ပါ
 from datetime import datetime, timedelta
 from typing import Union
 
