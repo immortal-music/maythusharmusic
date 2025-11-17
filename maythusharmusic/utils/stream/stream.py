@@ -1,3 +1,4 @@
+#stream.py
 import os
 from random import randint
 from typing import Union
@@ -73,6 +74,14 @@ async def stream(
                 if not forceplay:
                     db[chat_id] = []
                 status = True if video else None
+
+                # --- START OF MODIFICATION (LOCATION 1) ---
+                try:
+                    await mystic.edit_text(_["play_dl"].format(title))
+                except KeyError:
+                    await mystic.edit_text(f"Dow͟n͟l͟o͟a͟d͟ ဆွဲနေပါသည် ● ᥫ᭡ {title}")
+                # --- END OF MODIFICATION ---
+
                 try:
                     file_path, direct = await YouTube.download(
                         vidid, mystic, video=status, videoid=True
@@ -137,12 +146,18 @@ async def stream(
         duration_min = result["duration_min"]
         thumbnail = result["thumb"]
         status = True if video else None
-    
+
         current_queue = db.get(chat_id)
 
-        
         if current_queue is not None and len(current_queue) >= 50:
             return await app.send_message(original_chat_id, "You can't add more than 50 songs to the queue.")
+
+        # --- START OF MODIFICATION (LOCATION 2) ---
+        try:
+            await mystic.edit_text(_["play_dl"].format(title))
+        except KeyError:
+            await mystic.edit_text(f"Dow͟n͟l͟o͟a͟d͟ ဆွဲနေပါသည် ● ᥫ᭡ {title}")
+        # --- END OF MODIFICATION ---
 
         try:
             file_path, direct = await YouTube.download(
@@ -155,7 +170,7 @@ async def stream(
             await put_queue(
                 chat_id,
                 original_chat_id,
-                file_path if direct else f"vid_{vidid}",
+                file_path,  # <-- (FAST JOIN ပြင်ဆင်မှု ၁)
                 title,
                 duration_min,
                 user_name,
@@ -183,7 +198,7 @@ async def stream(
             await put_queue(
                 chat_id,
                 original_chat_id,
-                file_path if direct else f"vid_{vidid}",
+                file_path,  # <-- (FAST JOIN ပြင်ဆင်မှု ၂)
                 title,
                 duration_min,
                 user_name,
