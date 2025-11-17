@@ -1,4 +1,5 @@
 import random
+import string
 from typing import Dict, List, Union
 
 from maythusharmusic import userbot
@@ -29,6 +30,12 @@ userdb = mongodb.userstats
 videodb = mongodb.vipvideocalls
 chatsdbc = mongodb.chatsc  # for clone
 usersdbc = mongodb.tgusersdbc  # for clone
+
+# --- (CACHE COLLECTIONS အသစ် ထပ်တိုး) ---
+ytcache_db = mongodb.ytcache      # Search results (သီချင်းအချက်အလက်) cache
+songfiles_db = mongodb.songfiles  # Downloaded file path cache
+# --- (ဒီနေရာအထိ) ---
+
 
 # Shifting to memory [mongo sucks often]
 active = []
@@ -410,8 +417,8 @@ async def get_lang(chat_id: int) -> str:
     if not mode:
         lang = await langdb.find_one({"chat_id": chat_id})
         if not lang:
-            langm[chat_id] = "en"
-            return "en"
+            langm[chat_id] = "my"
+            return "my"
         langm[chat_id] = lang["lang"]
         return lang["lang"]
     return mode
@@ -872,68 +879,48 @@ async def cleanmode_on(chat_id: int):
 
 # Audio Video Limit
 
-"""
 from pytgcalls.types import AudioQuality, VideoQuality
 
-
 async def save_audio_bitrate(chat_id: int, bitrate: str):
-    audio[chat_id] = bitrate
+    audio[str(chat_id)] = bitrate
+    save_data(AUDIO_FILE, audio)
 
 
 async def save_video_bitrate(chat_id: int, bitrate: str):
-    video[chat_id] = bitrate
+    video[str(chat_id)] = bitrate
+    save_data(VIDEO_FILE, video)
 
 
 async def get_aud_bit_name(chat_id: int) -> str:
-    mode = audio.get(chat_id)
-    if not mode:
-        return "HIGH"
-    return mode
+    return audio.get(str(chat_id), "STUDIO")
 
 
 async def get_vid_bit_name(chat_id: int) -> str:
-    mode = video.get(chat_id)
-    if not mode:
-        if PRIVATE_BOT_MODE == str(True):
-            return "HD_720p"
-        else:
-            return "HD_720p"
-    return mode
+    return video.get(str(chat_id), "FHD_1080p")
 
 
 async def get_audio_bitrate(chat_id: int) -> str:
-    mode = audio.get(chat_id)
-    if not mode:
-        return AudioQuality.STUDIO
-    if str(mode) == "STUDIO":
-        return AudioQuality.STUDIO
-    elif str(mode) == "HIGH":
-        return AudioQuality.HIGH
-    elif str(mode) == "MEDIUM":
-        return AudioQuality.MEDIUM
-    elif str(mode) == "LOW":
-        return AudioQuality.LOW
+    mode = audio.get(str(chat_id), "STUDIO")
+    return {
+        "STUDIO": AudioQuality.STUDIO,
+        "HIGH": AudioQuality.HIGH,
+        "MEDIUM": AudioQuality.MEDIUM,
+        "LOW": AudioQuality.LOW,
+    }.get(mode, AudioQuality.MEDIUM)
 
 
 async def get_video_bitrate(chat_id: int) -> str:
-    mode = video.get(chat_id)
-    if not mode:
-        if PRIVATE_BOT_MODE == str(True):
-            return VideoQuality.FHD_1080p
-        else:
-            return VideoQuality.HD_720p
-    if str(mode) == "UHD_4K":
-        return VideoQuality.UHD_4K
-    elif str(mode) == "QHD_2K":
-        return VideoQuality.QHD_2K
-    elif str(mode) == "FHD_1080p":
-        return VideoQuality.FHD_1080p
-    elif str(mode) == "HD_720p":
-        return VideoQuality.HD_720p
-    elif str(mode) == "SD_480p":
-        return VideoQuality.SD_480p
-    elif str(mode) == "SD_360p":
-        return VideoQuality.SD_360p"""
+    mode = video.get(
+        str(chat_id), "SD_480p"
+    )  # Ensure chat_id is a string for JSON compatibility
+    return {
+        "UHD_4K": VideoQuality.UHD_4K,
+        "QHD_2K": VideoQuality.QHD_2K,
+        "FHD_1080p": VideoQuality.FHD_1080p,
+        "HD_720p": VideoQuality.HD_720p,
+        "SD_480p": VideoQuality.SD_480p,
+        "SD_360p": VideoQuality.SD_360p,
+    }.get(mode, VideoQuality.SD_480p)
 
 
 async def is_served_user_clone(user_id: int) -> bool:
@@ -980,3 +967,71 @@ async def add_served_chat_clone(chat_id: int):
 
 async def delete_served_chat_clone(chat_id: int):
     await chatsdbc.delete_one({"chat_id": chat_id})
+
+
+async def save_filter(chat_id: int, name: str, _filter: dict):
+    name = name.lower().strip()
+    _filters = await _get_filters(chat_id)
+    _filters[name] = _filter
+    await filtersdb.update_one(
+        {"chat_id": chat_id},
+        {"$set": {"filters": _filters}},
+        upsert=True,
+    )
+
+# --- (CACHE FUNCTIONS အသစ် (၅) ခု) ---
+
+# 1. Search Result Cache (သီချင်းအချက်အလက်)
+async def get_yt_cache(key: str) -> Union[dict, None]:
+    """MongoDB မှ cache လုပ်ထားသော YouTube search results ကို ပြန်ရှာသည်"""
+    try:
+        cached_result = await ytcache_db.find_one({"key": key})
+        if cached_result:
+            return cached_result["details"]
+    except Exception as e:
+        print(f"Error getting YT cache: {e}")
+        return None
+    return None
+
+# 2. Search Result Cache (သီချင်းအချက်အလက်)
+async def save_yt_cache(key: str, details: dict):
+    """YouTube search results များကို MongoDB တွင် သိမ်းဆည်းသည်"""
+    try:
+        await ytcache_db.update_one(
+            {"key": key},
+            {"$set": {"details": details}},
+            upsert=True
+        )
+    except Exception as e:
+        print(f"Error saving YT cache: {e}")
+
+# 3. Downloaded File Path Cache
+async def get_cached_song_path(video_id: str) -> Union[str, None]:
+    """MongoDB မှ cache လုပ်ထားသော local file path ကို ပြန်ရှာသည်"""
+    try:
+        cached_song = await songfiles_db.find_one({"video_id": video_id})
+        if cached_song:
+            return cached_song["file_path"]
+    except Exception as e:
+        print(f"Error getting song path cache: {e}")
+    return None
+
+# 4. Downloaded File Path Cache
+async def save_cached_song_path(video_id: str, file_path: str):
+    """local file path ကို MongoDB တွင် သိမ်းဆည်းသည်"""
+    try:
+        await songfiles_db.update_one(
+            {"video_id": video_id},
+            {"$set": {"file_path": file_path}},
+            upsert=True
+        )
+    except Exception as e:
+        print(f"Error saving song path cache: {e}")
+
+# 5. Downloaded File Path Cache
+async def remove_cached_song_path(video_id: str):
+    """MongoDB cache မှ file path ကို ဖယ်ရှားသည် (Clean Mode ကြောင့်)"""
+    try:
+        await songfiles_db.delete_one({"video_id": video_id})
+    except Exception as e:
+        print(f"Error removing song path cache: {e}")
