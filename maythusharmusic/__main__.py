@@ -5,7 +5,7 @@ from pyrogram import idle
 from pytgcalls.exceptions import NoActiveGroupCall
 
 import config
-from maythusharmusic import LOGGER, app, userbot
+from maythusharmusic import LOGGER, app, userbot, YouTube
 from maythusharmusic.core.call import Hotty
 from maythusharmusic.misc import sudo
 from maythusharmusic.plugins import ALL_MODULES
@@ -52,6 +52,16 @@ async def init():
     LOGGER("maythusharmusic").info(
         "ᴅʀᴏᴘ ʏᴏᴜʀ ɢɪʀʟꜰʀɪᴇɴᴅ'ꜱ ɴᴜᴍʙᴇʀ ᴀᴛ @sasukevipmusicbotsupport ᴊᴏɪɴ @sasukevipmusicbot , @sasukevipmusicbotsupport ꜰᴏʀ ᴀɴʏ ɪꜱꜱᴜᴇꜱ"
     )
+    
+    # --- (ပြင်ဆင်ချက် ၂ - Cache Pre-load လုပ်ရန် ဒီမှာ ထည့်ပါ) ---
+    LOGGER(__name__).info("ယာယီမှတ်ဉာဏ် (In-Memory Cache) ကို ကြိုတင်ဖြည့်နေပါသည်...")
+    try:
+        # youtube.py ထဲက load_cache() function ကို ခေါ်ပါ
+        await YouTube.load_cache() 
+    except Exception as e:
+        LOGGER(__name__).error(f"YouTube Cache ကို ကြိုတင်ဖြည့်ရာတွင် မအောင်မြင်ပါ: {e}")
+    # --- (ဒီအထိ) ---
+    
     await idle()
     await app.stop()
     await userbot.stop()
