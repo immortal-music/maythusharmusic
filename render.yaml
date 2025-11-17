@@ -1,0 +1,25 @@
+services:
+  - type: worker
+    name: music 1
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: pro plus
+    region: singapore
+    buildCommand: pip3 install --no-cache-dir --upgrade --requirement requirements.txt
+    envVars:
+      - key: API_ID
+        value: ""
+      - key: API_HASH
+        value: ""
+      - key: STORAGE_CHANNEL_ID
+        value: ""
+      - key: BOT_TOKEN
+        value: ""
+      - key: MONGO_DB_URI
+        value: ""
+      - key: OWNER_ID
+        value: ""
+      - key: LOGGER_ID
+        value: ""
+      - key: STRING_SESSION
+        value: ""
