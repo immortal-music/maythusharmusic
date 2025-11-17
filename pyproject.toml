@@ -1,0 +1,70 @@
+[build-system]
+# Modern setuptools ကို build tool အဖြစ် သတ်မှတ်
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# --- ဒီနေရာက project အချက်အလက်တွေကို သင့် project အလိုက် ပြင်ဆင်ပါ ---
+name = "maythusharmusic"
+version = "0.1.0"
+description = "Hello Gays"
+readme = "README.md"
+requires-python = ">=3.11" # သင်သုံးမယ့် Python version ကို သတ်မှတ်ပါ
+
+# --- Project Dependencies (requirements.txt မှ) ---
+dependencies = [
+    # Standard PyPI Packages
+    "telethon==1.33.1",
+    "aiofiles",
+    "apscheduler",
+    "aiohttp==3.9.3",
+    "ffmpeg-python",
+    "gTTS",
+    "dnspython==2.3.0",
+    "hachoir",
+    "heroku3",
+    "motor",
+    "pillow==9.5.0",
+    "psutil",
+    "wget",
+    "qrcode",
+    "future==0.18.3",
+    "search_engine_parser",
+    "speedtest",
+    "py-tgcalls==2.2.8",
+    "pytube",
+    "MukeshAPI",
+    "ntgcalls==2.0.6",
+    "gitpython",
+    "pykeyboard",
+    "python-dotenv",
+    "pyyaml==6.0.1",
+    "tgcrypto",
+    "telegraph==2.2.0",
+    "yt-dlp[default]>=2025.10.31.222828.dev0",
+    "lexica-api==1.4.7",
+    "httpx==0.25.2",
+    "lyricsgenius",
+    "spotipy",
+    "youtube_search",
+    "youtube-search-python",
+    "googlesearch-python",
+    "unidecode",
+    "bing_image_downloader",
+
+    # --- Git and URL Dependencies (PEP 508 format) ---
+    
+    # requirements.txt ထဲက Pyrogram>=2.0.0 နှင့် 
+    # https://github.com/KurimuzonAkuma/pyrogram/archive/v2.1.23.zip 
+    # နှစ်ခုမှာ ပိုသေချာတဲ့ URL ကို PEP 508 format နဲ့ သုံးထားပါတယ်
+    "pyrogram @ https://github.com/KurimuzonAkuma/pyrogram/archive/v2.1.23.zip",
+    
+    # requirements.txt ထဲက SafoneAPI နှင့် 
+    # git+https://github.com/AsmSafone/SafoneAPI
+    # နှစ်ခုမှာ ပိုသေချာတဲ့ Git URL ကို PEP 508 format နဲ့ သုံးထားပါတယ်
+    "SafoneAPI @ git+https://github.com/AsmSafone/SafoneAPI"
+]
+
+[project.urls]
+# --- (Optional) သင့် project ရဲ့ URL တွေ ထည့်နိုင်ပါတယ် ---
+Homepage = "https://github.com/nan20psp/maythusharmusic"
