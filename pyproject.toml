@@ -24,7 +24,7 @@ dependencies = [
     "hachoir",
     "heroku3",
     "motor",
-    "pillow==9.5.0",
+    "pillow==12.1.0",
     "psutil",
     "wget",
     "qrcode",
