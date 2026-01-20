@@ -31,7 +31,7 @@ dependencies = [
     "future==0.18.3",
     "search_engine_parser",
     "speedtest",
-    "py-tgcalls==2.2.8",
+    "py-tgcalls==2.2.10",
     "pytube",
     "MukeshAPI",
     "ntgcalls==2.0.6",
